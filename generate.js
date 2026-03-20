@@ -10,6 +10,11 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: 'No prompt provided' });
 
+    // Check API key exists
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'API key not configured. Add GEMINI_API_KEY in Vercel environment variables.' });
+    }
+
     const response = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + process.env.GEMINI_API_KEY,
       {
@@ -22,10 +27,21 @@ export default async function handler(req, res) {
       }
     );
 
-    const data = await response.json();
+    // Safely parse response
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch(e) {
+      return res.status(500).json({ error: 'Gemini returned unexpected response: ' + rawText.substring(0, 100) });
+    }
 
     if (data.error) {
       return res.status(400).json({ error: data.error.message });
+    }
+
+    if (!data.candidates || !data.candidates[0]) {
+      return res.status(500).json({ error: 'No response from Gemini. Check your API key.' });
     }
 
     const text = data.candidates[0].content.parts[0].text;
