@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ListifyAI India — AI Listing Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--saffron:#FF9933;--saffron-light:#FFD4A3;--saffron-dark:#E07800;--green:#138808;--navy:#0D1B2A;--cream:#FFF9F0;--muted:#8a7a68;--border:rgba(255,153,51,0.2);--text:#1a1410}
+  body{background:var(--cream);color:var(--text);font-family:'Playfair Display',Georgia,serif;min-height:100vh;overflow-x:hidden}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 3rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,249,240,0.95);backdrop-filter:blur(14px);z-index:100}
+  .logo{font-family:'Rajdhani',sans-serif;font-size:1.7rem;font-weight:700;color:var(--navy)}
+  .logo span{color:var(--saffron)}
+  .logo sub{font-size:.6rem;font-weight:500;color:var(--green);letter-spacing:.15em;text-transform:uppercase;vertical-align:middle;margin-left:.3rem}
+  .free-badge{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;background:var(--green);color:white;padding:.3rem .8rem;border-radius:20px}
+  .hero{padding:5rem 3rem 3rem;max-width:1150px;margin:0 auto;display:grid;grid-template-columns:1.1fr 1fr;gap:4rem;align-items:start}
+  .hero-left{animation:fadeUp .7s .1s ease both}
+  .hero-right{animation:fadeUp .7s .3s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+  .eyebrow{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--saffron-dark);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+  .eyebrow::before{content:'';display:block;width:2rem;height:1px;background:var(--saffron)}
+  h1{font-size:clamp(2.2rem,4.5vw,3.8rem);font-weight:600;line-height:1.1;color:var(--navy);margin-bottom:1.2rem}
+  h1 em{font-style:italic;color:var(--saffron-dark)}
+  h1 .green{color:var(--green)}
+  .hero-sub{font-size:1.05rem;color:var(--muted);line-height:1.75;margin-bottom:2rem;font-family:'Rajdhani',sans-serif;letter-spacing:.02em}
+  .free-highlight{background:rgba(19,136,8,0.08);border:1px solid rgba(19,136,8,0.25);border-radius:4px;padding:1rem 1.2rem;margin-bottom:1.5rem;font-family:'Rajdhani',sans-serif;font-size:1rem;color:var(--green);font-weight:600}
+  .free-highlight span{font-family:'DM Mono',monospace;font-size:.65rem;display:block;color:var(--muted);font-weight:400;margin-top:.3rem;letter-spacing:.05em}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;padding:1.5rem 0;border-top:1px solid var(--border)}
+  .stat-num{font-family:'Rajdhani',sans-serif;font-size:2rem;font-weight:700;color:var(--saffron-dark);line-height:1}
+  .stat-label{font-family:'DM Mono',monospace;font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-top:.2rem}
+  .form-card{background:var(--navy);border-radius:6px;padding:2.2rem;border:1px solid rgba(255,153,51,0.15);box-shadow:0 40px 80px rgba(13,27,42,.3);position:relative;overflow:hidden}
+  .form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--saffron),#FF6B00,var(--green))}
+  .form-title{font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--cream);margin-bottom:.3rem}
+  .form-sub{font-family:'DM Mono',monospace;font-size:.58rem;color:rgba(255,153,51,.6);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.5rem}
+  .field{margin-bottom:.9rem}
+  .field-group{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.9rem}
+  .field-group-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:.9rem}
+  label{display:block;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--saffron-light);margin-bottom:.4rem;opacity:.8}
+  input,select,textarea{width:100%;background:rgba(255,249,240,.05);border:1px solid rgba(255,153,51,.15);border-radius:3px;padding:.65rem .85rem;color:var(--cream);font-family:'Rajdhani',sans-serif;font-size:.95rem;transition:border-color .2s,background .2s;outline:none;-webkit-appearance:none}
+  input::placeholder,textarea::placeholder{color:rgba(255,249,240,.25);font-size:.85rem}
+  input:focus,select:focus,textarea:focus{border-color:var(--saffron);background:rgba(255,153,51,.06)}
+  select option{background:#1a2d40;color:var(--cream)}
+  textarea{resize:vertical;min-height:70px;line-height:1.5}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
+  .chip{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;padding:.35rem .7rem;border:1px solid rgba(255,153,51,.2);border-radius:2px;color:rgba(255,249,240,.45);cursor:pointer;transition:all .2s;user-select:none;background:transparent}
+  .chip:hover{border-color:var(--saffron);color:var(--saffron-light)}
+  .chip.active{border-color:var(--saffron);color:var(--navy);background:var(--saffron)}
+  .generate-btn{width:100%;margin-top:1.2rem;padding:.95rem;background:linear-gradient(135deg,var(--saffron),#FF6B00);color:white;border:none;border-radius:3px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .25s}
+  .generate-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(255,153,51,.4)}
+  .generate-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+  .output-section{max-width:1150px;margin:0 auto 5rem;padding:0 3rem;display:none;animation:fadeUp .6s ease both}
+  .output-section.visible{display:block}
+  .output-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+  .output-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--saffron-dark);display:flex;align-items:center;gap:.5rem}
+  .pulse{width:6px;height:6px;border-radius:50%;background:var(--saffron);animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+  .btn-row{display:flex;gap:.5rem}
+  .action-btn{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem .9rem;border:1px solid var(--border);border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+  .action-btn:hover{border-color:var(--saffron);color:var(--saffron-dark)}
+  .variations{display:flex;gap:.4rem;margin-bottom:1rem;flex-wrap:wrap}
+  .var-tab{font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;padding:.4rem .9rem;border:1px solid var(--border);border-radius:2px;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+  .var-tab.active{background:var(--navy);color:var(--saffron);border-color:var(--navy)}
+  .output-box{background:white;border:1px solid var(--border);border-top:3px solid var(--saffron);border-radius:4px;padding:2.5rem;min-height:180px;font-size:1.1rem;line-height:1.85;color:var(--text);box-shadow:0 15px 50px rgba(13,27,42,.08);white-space:pre-wrap}
+  .output-box.loading{display:flex;align-items:center;justify-content:center;color:var(--muted);font-style:italic;font-size:.95rem;font-family:'Rajdhani',sans-serif}
+  .output-box.error{color:#c0392b;font-family:'DM Mono',monospace;font-size:.75rem;line-height:1.8;background:#fff5f5;border-top-color:#c0392b}
+  @keyframes dots{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+  .loading-dots::after{content:'';animation:dots 1.5s infinite}
+  .how-section{background:var(--navy);padding:4rem 3rem}
+  .how-inner{max-width:1150px;margin:0 auto}
+  .section-eyebrow{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--saffron);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem}
+  .section-eyebrow::before{content:'';display:block;width:1.5rem;height:1px;background:var(--saffron)}
+  .section-title{font-size:clamp(1.8rem,3vw,2.5rem);font-weight:600;color:var(--cream);margin-bottom:2.5rem;line-height:1.2}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+  .step{border-top:1px solid rgba(255,153,51,.2);padding-top:1.5rem}
+  .step-num{font-family:'Rajdhani',sans-serif;font-size:3rem;font-weight:700;color:rgba(255,153,51,.2);line-height:1;margin-bottom:.6rem}
+  .step-title{font-size:1.2rem;font-weight:600;color:var(--cream);margin-bottom:.5rem}
+  .step-desc{font-size:.95rem;color:var(--muted);line-height:1.7;font-family:'Rajdhani',sans-serif}
+  .step-desc strong{color:var(--saffron-light)}
+  .pricing-section{max-width:1150px;margin:0 auto;padding:5rem 3rem}
+  .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:2.5rem}
+  .plan{border:1px solid var(--border);border-radius:4px;padding:2rem;transition:transform .3s,box-shadow .3s;position:relative}
+  .plan:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(13,27,42,.1)}
+  .plan.featured{background:var(--navy);border-color:var(--saffron)}
+  .popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--saffron);color:white;font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.15em;text-transform:uppercase;padding:.25rem .8rem;border-radius:20px;white-space:nowrap}
+  .plan-name{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--saffron-dark);margin-bottom:.8rem}
+  .plan.featured .plan-name{color:var(--saffron)}
+  .plan-price{font-family:'Rajdhani',sans-serif;font-size:2.8rem;font-weight:700;color:var(--navy);line-height:1}
+  .plan.featured .plan-price{color:var(--cream)}
+  .plan-period{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:1.5rem;margin-top:.2rem}
+  .plan-features{list-style:none;border-top:1px solid var(--border);padding-top:1.2rem}
+  .plan-features li{font-family:'Rajdhani',sans-serif;font-size:.95rem;color:var(--muted);padding:.35rem 0;display:flex;align-items:center;gap:.6rem}
+  .plan.featured .plan-features li{color:var(--saffron-light)}
+  .plan-features li::before{content:'✦';color:var(--saffron);font-size:.5rem}
+  .plan-btn{width:100%;margin-top:1.5rem;padding:.75rem;border-radius:3px;font-family:'Rajdhani',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid var(--saffron);color:var(--saffron-dark);background:transparent}
+  .plan.featured .plan-btn{background:var(--saffron);color:white}
+  .plan-btn:hover{opacity:.85;transform:translateY(-1px)}
+  footer{background:var(--navy);padding:2rem 3rem;text-align:center;border-top:1px solid rgba(255,153,51,.1)}
+  .footer-logo{font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700;color:var(--cream);margin-bottom:.5rem}
+  .footer-logo span{color:var(--saffron)}
+  .footer-text{font-family:'DM Mono',monospace;font-size:.55rem;color:rgba(255,249,240,.3);letter-spacing:.1em;text-transform:uppercase}
+  @media(max-width:768px){
+    nav{padding:1rem 1.2rem}
+    .hero{grid-template-columns:1fr;gap:2rem;padding:2.5rem 1.2rem 1.5rem}
+    .output-section{padding:0 1.2rem}
+    .field-group,.field-group-3{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr}
+    .plans{grid-template-columns:1fr}
+    .how-section,.pricing-section{padding:3rem 1.2rem}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Listify<span>AI</span><sub>India</sub></div>
+  <div style="display:flex;align-items:center;gap:.8rem">
+    <span>🇮🇳</span>
+    <div class="free-badge">100% Free to Start</div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-left">
+    <div class="eyebrow">India's #1 Free AI Listing Tool</div>
+    <h1>Property listings that <em>sell faster</em> on <span class="green">every platform</span></h1>
+    <p class="hero-sub">Enter property details in BHK format. Get professional descriptions for MagicBricks, 99acres, Housing.com — powered by Google Gemini AI. Zero cost to start.</p>
+    <div class="free-highlight">
+      ✅ 100% Free — No API key needed, No payment required
+      <span>Just fill the form and generate. That's it.</span>
+    </div>
+    <div class="stats">
+      <div class="stat-item"><div class="stat-num">₹0</div><div class="stat-label">Cost to Use</div></div>
+      <div class="stat-item"><div class="stat-num">15s</div><div class="stat-label">Per Listing</div></div>
+      <div class="stat-item"><div class="stat-num">3</div><div class="stat-label">Variations</div></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="form-card">
+      <div class="form-title">Generate Your Listing</div>
+      <div class="form-sub">BHK format · All Indian cities · Completely Free</div>
+
+      <div class="field-group">
+        <div class="field">
+          <label>Property Type</label>
+          <select id="propType">
+            <option value="1 BHK apartment">1 BHK Apartment</option>
+            <option value="2 BHK apartment" selected>2 BHK Apartment</option>
+            <option value="3 BHK apartment">3 BHK Apartment</option>
+            <option value="4 BHK apartment">4 BHK Apartment</option>
+            <option value="studio apartment">Studio Apartment</option>
+            <option value="independent house / villa">Independent House / Villa</option>
+            <option value="builder floor">Builder Floor</option>
+            <option value="penthouse">Penthouse</option>
+            <option value="commercial office space">Commercial Office</option>
+            <option value="shop / retail space">Shop / Retail</option>
+            <option value="plot / land">Plot / Land</option>
+            <option value="row house">Row House</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Listing Type</label>
+          <select id="listingType">
+            <option value="sale">For Sale</option>
+            <option value="rent">For Rent</option>
+            <option value="lease">For Lease</option>
+            <option value="PG / co-living">PG / Co-Living</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group-3">
+        <div class="field">
+          <label>Carpet Area (sq ft)</label>
+          <input type="text" id="carpetArea" placeholder="e.g. 950" />
+        </div>
+        <div class="field">
+          <label>Floor</label>
+          <input type="text" id="floor" placeholder="e.g. 5th/12" />
+        </div>
+        <div class="field">
+          <label>Property Age</label>
+          <select id="propAge">
+            <option value="brand new / under construction">New / UC</option>
+            <option value="less than 2 years old">0–2 yrs</option>
+            <option value="2–5 years old">2–5 yrs</option>
+            <option value="5–10 years old">5–10 yrs</option>
+            <option value="10+ years old">10+ yrs</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label>City</label>
+          <select id="city">
+            <option>Mumbai</option><option>Delhi</option><option>Bangalore</option>
+            <option>Hyderabad</option><option>Pune</option><option>Chennai</option>
+            <option>Kolkata</option><option>Ahmedabad</option><option>Noida</option>
+            <option>Gurgaon</option><option>Navi Mumbai</option><option>Thane</option>
+            <option>Jaipur</option><option>Lucknow</option><option>Surat</option>
+            <option>Indore</option><option>Bhopal</option><option>Nagpur</option>
+            <option>Coimbatore</option><option>Kochi</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Locality / Area</label>
+          <input type="text" id="locality" placeholder="e.g. Bandra West" />
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field">
+          <label>Price / Rent</label>
+          <input type="text" id="price" placeholder="e.g. ₹85 Lakhs" />
+        </div>
+        <div class="field">
+          <label>Parking</label>
+          <select id="parking">
+            <option value="covered parking included">Covered Parking</option>
+            <option value="open parking included">Open Parking</option>
+            <option value="2 covered parking spots">2 Parking Spots</option>
+            <option value="no parking">No Parking</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Key Amenities & Features</label>
+        <textarea id="features" placeholder="e.g. modular kitchen, vastu compliant, 24/7 security, gym, swimming pool, near metro..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Furnishing Status</label>
+        <div class="chips" id="furnishGroup">
+          <div class="chip active" data-val="fully furnished">Fully Furnished</div>
+          <div class="chip" data-val="semi-furnished">Semi Furnished</div>
+          <div class="chip" data-val="unfurnished">Unfurnished</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Target Buyer</label>
+        <div class="chips" id="toneGroup">
+          <div class="chip active" data-val="young professionals and families">Young Families</div>
+          <div class="chip" data-val="NRI buyers looking for premium investment">NRI Buyers</div>
+          <div class="chip" data-val="first-time homebuyers on a budget">First-Time Buyers</div>
+          <div class="chip" data-val="real estate investors seeking good rental returns">Investors</div>
+          <div class="chip" data-val="luxury homebuyers">Luxury</div>
+        </div>
+      </div>
+
+      <button class="generate-btn" id="generateBtn" onclick="generateListing()">
+        🏠 Generate Free Listing Description
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="output-section" id="outputSection">
+  <div class="output-header">
+    <div class="output-label">
+      <div class="pulse" id="pulseEl"></div>
+      <span id="outputStatus">Your Listing is Ready</span>
+    </div>
+    <div class="btn-row">
+      <button class="action-btn" onclick="copyText()">📋 Copy</button>
+      <button class="action-btn" onclick="generateListing()">🔄 Regenerate</button>
+    </div>
+  </div>
+  <div class="variations" id="varTabs"></div>
+  <div class="output-box" id="outputBox"></div>
+</div>
+
+<div class="how-section">
+  <div class="how-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <h2 class="section-title">From blank page to <em>sold</em> in seconds</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Fill Property Details</div>
+        <div class="step-desc">Enter BHK type, city, price and features. Takes 30 seconds. No account needed.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">AI Writes Your Listing</div>
+        <div class="step-desc">Gemini AI generates 3 professional descriptions in 15 seconds. Optimized for <strong>MagicBricks, 99acres, Housing.com.</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Copy & Post Anywhere</div>
+        <div class="step-desc">One click copy. Paste directly to any platform. Get more calls. Close more deals.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pricing-section">
+  <div class="section-eyebrow">Simple Pricing in ₹</div>
+  <h2 class="section-title">Start free. Scale as you grow.</h2>
+  <div class="plans">
+    <div class="plan">
+      <div class="plan-name">Free Forever</div>
+      <div class="plan-price">₹0</div>
+      <div class="plan-period">always free</div>
+      <ul class="plan-features">
+        <li>5 listings per day</li>
+        <li>All Indian cities</li>
+        <li>BHK format support</li>
+        <li>3 variations per listing</li>
+        <li>No account needed</li>
+      </ul>
+      <button class="plan-btn">You're On This</button>
+    </div>
+    <div class="plan featured">
+      <div class="popular-badge">Most Popular</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">₹999</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li>Unlimited listings</li>
+        <li>WhatsApp bot access</li>
+        <li>Hindi listings</li>
+        <li>Social media captions</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="plan-btn">Upgrade to Pro</button>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Agency</div>
+      <div class="plan-price">₹4,999</div>
+      <div class="plan-period">per month</div>
+      <ul class="plan-features">
+        <li>Up to 10 agent seats</li>
+        <li>Custom brand voice</li>
+        <li>Bulk generation</li>
+        <li>White-label option</li>
+        <li>Dedicated support</li>
+      </ul>
+      <button class="plan-btn">Contact Us</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">Listify<span>AI</span> India 🇮🇳</div>
+  <div class="footer-text">Powered by Google Gemini AI · Built for Indian Real Estate Professionals · Free to Start</div>
+</footer>
+
+<script>
+  ['furnishGroup','toneGroup'].forEach(function(groupId){
+    document.querySelectorAll('#'+groupId+' .chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        document.querySelectorAll('#'+groupId+' .chip').forEach(function(c){c.classList.remove('active')});
+        chip.classList.add('active');
+      });
+    });
+  });
+
+  var generatedVariations = [];
+
+  async function generateListing(){
+    var btn = document.getElementById('generateBtn');
+    var outputSection = document.getElementById('outputSection');
+    var outputBox = document.getElementById('outputBox');
+    var varTabs = document.getElementById('varTabs');
+    var outputStatus = document.getElementById('outputStatus');
+    var pulseEl = document.getElementById('pulseEl');
+
+    var propType = document.getElementById('propType').value;
+    var listingType = document.getElementById('listingType').value;
+    var carpetArea = document.getElementById('carpetArea').value;
+    var floor = document.getElementById('floor').value;
+    var propAge = document.getElementById('propAge').value;
+    var city = document.getElementById('city').value;
+    var locality = document.getElementById('locality').value;
+    var price = document.getElementById('price').value;
+    var parking = document.getElementById('parking').value;
+    var features = document.getElementById('features').value;
+    var furnishing = document.querySelector('#furnishGroup .chip.active').dataset.val;
+    var tone = document.querySelector('#toneGroup .chip.active').dataset.val;
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Generating...';
+    outputSection.classList.add('visible');
+    outputBox.className = 'output-box loading';
+    outputBox.innerHTML = '<span>AI is writing your listing<span class="loading-dots"></span></span>';
+    varTabs.innerHTML = '';
+    outputStatus.textContent = 'Generating 3 variations...';
+    pulseEl.style.display = 'block';
+    outputSection.scrollIntoView({behavior:'smooth',block:'start'});
+
+    var prompt = "You are an expert Indian real estate copywriter. Generate 3 distinct property listing descriptions optimized for MagicBricks, 99acres, and Housing.com.\n\nProperty:\n- Type: "+propType+"\n- For: "+listingType+"\n- Carpet Area: "+(carpetArea?carpetArea+' sq ft':'not specified')+"\n- Floor: "+(floor||'not specified')+"\n- Age: "+propAge+"\n- City: "+city+"\n- Locality: "+(locality||'not specified')+"\n- Price/Rent: "+(price||'not specified')+"\n- Parking: "+parking+"\n- Furnishing: "+furnishing+"\n- Features: "+(features||'standard amenities')+"\n- Target Buyer: "+tone+"\n\nUse Indian real estate terms naturally (BHK, vastu, society, gated community, EMI-friendly etc). Use ₹ for prices.\n\nFormat EXACTLY:\n[VARIATION 1]\n(text)\n\n[VARIATION 2]\n(text)\n\n[VARIATION 3]\n(text)\n\nEach: 120-180 words. Compelling and buyer-focused. No intro or explanation.";
+
+    try {
+      // Calls YOUR Netlify function — no CORS, no API key exposed
+      var response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: prompt })
+      });
+
+      var data = await response.json();
+
+      if(data.error){
+        outputBox.className = 'output-box error';
+        outputBox.textContent = '❌ Error: ' + data.error;
+        outputStatus.textContent = 'Error';
+        pulseEl.style.display = 'none';
+        btn.disabled = false;
+        btn.textContent = '🏠 Generate Free Listing Description';
+        return;
+      }
+
+      var text = data.text;
+      var parts = text.split(/\[VARIATION \d+\]/).map(function(s){return s.trim()}).filter(Boolean);
+      generatedVariations = parts.length >= 2 ? parts : [text];
+
+      varTabs.innerHTML = '';
+      generatedVariations.forEach(function(_,i){
+        var tab = document.createElement('button');
+        tab.className = 'var-tab'+(i===0?' active':'');
+        tab.textContent = 'Version '+(i+1);
+        tab.onclick = function(){switchVar(i)};
+        varTabs.appendChild(tab);
+      });
+
+      outputBox.className = 'output-box';
+      outputBox.textContent = generatedVariations[0];
+      outputStatus.textContent = 'Your Listing is Ready ✦';
+      pulseEl.style.display = 'none';
+
+    } catch(err){
+      outputBox.className = 'output-box error';
+      outputBox.textContent = '❌ Something went wrong\n\n' + err.message;
+      outputStatus.textContent = 'Error';
+      pulseEl.style.display = 'none';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🏠 Generate Free Listing Description';
+  }
+
+  function switchVar(i){
+    document.getElementById('outputBox').textContent = generatedVariations[i];
+    document.querySelectorAll('.var-tab').forEach(function(t,idx){t.classList.toggle('active',idx===i)});
+  }
+
+  function copyText(){
+    navigator.clipboard.writeText(document.getElementById('outputBox').textContent).then(function(){
+      var b = document.querySelectorAll('.action-btn')[0];
+      b.textContent = '✅ Copied!';
+      setTimeout(function(){b.textContent='📋 Copy'},2000);
+    });
+  }
+</script>
+</body>
+</html>
